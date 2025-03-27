@@ -2,7 +2,7 @@
 
 ## Authors
 - Matthew Chung
-- [Partner's Name]
+- Jarrett Hampel
 
 ## Project Description
 Our project aims to create an intelligent restaurant recommendation system that helps users discover dining options based on their preferences, dietary restrictions, and past experiences. The system will analyze user reviews, ratings, and menu data to provide personalized recommendations. We will implement machine learning algorithms to understand user preferences and predict restaurant ratings. The interface will be user-friendly and intuitive, allowing users to easily input their preferences and receive tailored restaurant suggestions. The system will also include features for restaurant owners to understand customer feedback and improve their services.
