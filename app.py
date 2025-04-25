@@ -3,48 +3,95 @@ import jwt.utils
 import time
 import math
 import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import pandas as pd
 
-accessKey = {"developer_id": "fba373c0-78b6-4903-b575-7448c8392172",
-    "key_id": "9bd3b7ac-7547-4e69-96ef-fb4896592333",
-    "signing_secret": "B1JPQQOuN6CtySk4qJKUJ8fFFEHRXgqxU0M3bSji-0Q"}
+def setup_driver():
+    # Setup Chrome options
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')  # Run in headless mode (no GUI)
+    options.add_argument('--disable-gpu')
+    return webdriver.Chrome(options=options)
 
-token = jwt.encode(
-    {
-        "aud": "doordash",
-        "iss": accessKey["developer_id"],
-        "kid": accessKey["key_id"],
-        "exp": str(math.floor(time.time() + 300)),
-        "iat": str(math.floor(time.time())),
-    },
-    jwt.utils.base64url_decode(accessKey["signing_secret"]),
-    algorithm="HS256",
-    headers={"dd-ver": "DD-JWT-V1"})
+def scrape_restaurant_data(location):
+    driver = setup_driver()
+    restaurants = []
+    
+    try:
+        # Navigate to Google Maps
+        driver.get('https://www.google.com/maps')
+        
+        # Wait for search box and enter query
+        search_box = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "searchboxinput"))
+        )
+        search_box.send_keys(f"restaurants in {location}")
+        search_box.send_keys(Keys.ENTER)
+        
+        # Wait for results to load
+        time.sleep(5)
+        
+        # Find restaurant elements
+        restaurant_elements = driver.find_elements(By.CLASS_NAME, "hfpxzc")
+        
+        # Iterate through first 10 restaurants
+        for element in restaurant_elements[:10]:
+            try:
+                element.click()
+                time.sleep(2)  # Wait for details to load
+                
+                # Extract restaurant information
+                name = driver.find_element(By.CLASS_NAME, "fontHeadlineLarge").text
+                try:
+                    rating = driver.find_element(By.CLASS_NAME, "fontDisplayLarge").text
+                except:
+                    rating = "No rating"
+                    
+                try:
+                    reviews = driver.find_element(By.CLASS_NAME, "fontBodyMedium").text
+                except:
+                    reviews = "No reviews"
+                
+                restaurants.append({
+                    'name': name,
+                    'rating': rating,
+                    'reviews': reviews
+                })
+                
+            except Exception as e:
+                print(f"Error processing restaurant: {e}")
+                continue
+                
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+    finally:
+        driver.quit()
+        
+    return restaurants
 
-print(token)
+def main():
+    # Specify the location you want to search
+    location = "San Francisco, CA"
+    
+    # Scrape restaurant data
+    results = scrape_restaurant_data(location)
+    
+    # Convert to DataFrame and save to CSV
+    df = pd.DataFrame(results)
+    df.to_csv('restaurants.csv', index=False)
+    print("Results saved to restaurants.csv")
+    
+    # Print results
+    for restaurant in results:
+        print(f"Name: {restaurant['name']}")
+        print(f"Rating: {restaurant['rating']}")
+        print(f"Reviews: {restaurant['reviews']}")
+        print("-" * 50)
 
-
-endpoint = "https://openapi.doordash.com/drive/v2/deliveries/"
-
-headers = {"Accept-Encoding": "application/json",
-           "Authorization": "Bearer " + token,
-           "Content-Type": "application/json"}
-
-request_body = { # Modify pickup and drop off addresses below
-    "external_delivery_id": "D-12345",
-    "pickup_address": "901 Market Street 6th Floor San Francisco, CA 94103",
-    "pickup_business_name": "Wells Fargo SF Downtown",
-    "pickup_phone_number": "+16505555555",
-    "pickup_instructions": "Enter gate code 1234 on the callbox.",
-    "dropoff_address": "901 Market Street 6th Floor San Francisco, CA 94103",
-    "dropoff_business_name": "Wells Fargo SF Downtown",
-    "dropoff_phone_number": "+16505555555",
-    "dropoff_instructions": "Enter gate code 1234 on the callbox.",
-    "order_value": 1999
-}
-
-create_delivery = requests.post(endpoint, headers=headers, json=request_body) # Create POST request
-
-
-print(create_delivery.status_code)
-print(create_delivery.text)
-print(create_delivery.reason)
+if __name__ == "__main__":
+    main()
