@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title></title>
+  <title>San Jose Resurant</title>
 </head>
 
 <body>
-    <form>
-      <select>
-        
+  <h1>Choose a Restaurant</h1>
+    <form method="get">
+      <select name="restaurant">
+      {% for name in restaurants %}
+        <option value="{{ name }}">{{ name }}</option>
+      {% endfor %}
       </select>
-      <input">
+      <input type="text" name="feedback" placeholder="Wrtie a review or comment">
+      <button type="submit">Submit</button>
     </form>
-  </div>
-
-
-  <script>
-    
-  </script>
-
 </body>
 </html>
