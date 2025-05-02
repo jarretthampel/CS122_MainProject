@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>San Jose Resurant</title>
+  <title>San Jose Restaurants</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <body>
-  <h1>Choose a Restaurant</h1>
-    <form method="get">
-      <select name="restaurant">
-      {% for name in restaurants %}
-        <option value="{{ name }}">{{ name }}</option>
-      {% endfor %}
-      </select>
-      <input type="text" name="feedback" placeholder="Wrtie a review or comment">
-      <button type="submit">Submit</button>
+  <div class="container">
+    <div class="yelp-header">
+      <h1>San Jose Resturants</h1>
+    <div class="yelp-logo">Yelp</div>
+    </div>
+
+    <div class="search-form">
+      <form method="get">
+        <div>
+          <label for="resturant">Select a Resturant:</label>
+          <select name="resturant" id="resturant" onchange="this.form.submit()">
+            <option value="">-- Select a Restaurant --</option>
+            {% for restaurant in restaurants %}
+            <option value="{{ resturant.name }}" {% if selected_resturant and selected_resturant.name == resturant.name %}selected{% endif %}>
+              {{ restaurant.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+
     </form>
 </body>
 </html>
