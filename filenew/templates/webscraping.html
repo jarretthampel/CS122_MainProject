@@ -1,19 +1,383 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>San Jose Resurant</title>
+  <title>San Jose Restaurants</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: #f5f5f5;
+    }
+    
+    h1, h2, h3 {
+      color: #d32323; /* Yelp red */
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .search-form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    select, input, button {
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    select {
+      min-width: 200px;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    button {
+      background-color: #d32323;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background-color: #be1e1e;
+    }
+    
+    .restaurant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .restaurant-card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    
+    .restaurant-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .restaurant-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    
+    .restaurant-info {
+      padding: 15px;
+    }
+    
+    .restaurant-name {
+      font-weight: bold;
+      font-size: 18px;
+      margin: 0 0 10px 0;
+    }
+    
+    .restaurant-rating {
+      color: #f15c4f;
+      margin-bottom: 5px;
+    }
+    
+    .restaurant-category, .restaurant-price {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .restaurant-address {
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    
+    .restaurant-details {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .restaurant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .restaurant-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .restaurant-main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    @media (min-width: 768px) {
+      .restaurant-main {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .restaurant-section {
+      margin-bottom: 20px;
+    }
+    
+    .restaurant-section h3 {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .review-item {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .star-rating {
+      color: #f8ce0b;
+    }
+    
+    .disclaimer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+    }
+    
+    .yelp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .yelp-logo {
+      color: #d32323;
+      font-weight: bold;
+      font-size: 24px;
+    }
+    
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .filter-button {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .filter-button:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .filter-button.active {
+      background-color: #d32323;
+      color: white;
+      border-color: #d32323;
+    }
+    
+    .category-tag {
+      display: inline-block;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+    
+    @media (max-width: 768px) {
+      .restaurant-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Choose a Restaurant</h1>
-    <form method="get">
-      <select name="restaurant">
-      {% for name in restaurants %}
-        <option value="{{ name }}">{{ name }}</option>
-      {% endfor %}
-      </select>
-      <input type="text" name="feedback" placeholder="Wrtie a review or comment">
-      <button type="submit">Submit</button>
-    </form>
+  <div class="container">
+    <div class="yelp-header">
+      <h1>San Jose Restaurants</h1>
+      <div class="yelp-logo">Yelp</div>
+    </div>
+    
+    <div class="search-form">
+      <form method="get">
+        <div>
+          <label for="restaurant">Select a Restaurant:</label>
+          <select name="restaurant" id="restaurant" onchange="this.form.submit()">
+            <option value="">-- Select a Restaurant --</option>
+            {% for restaurant in restaurants %}
+              <option value="{{ restaurant.name }}" {% if selected_restaurant and selected_restaurant.name == restaurant.name %}selected{% endif %}>
+                {{ restaurant.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+    
+    {% if not selected_restaurant %}
+      <div class="filters">
+        <button class="filter-button active">All</button>
+        <button class="filter-button">$</button>
+        <button class="filter-button">$$</button>
+        <button class="filter-button">$$$</button>
+        <button class="filter-button">$$$$</button>
+        <button class="filter-button">Open Now</button>
+        <button class="filter-button">Reservations</button>
+        <button class="filter-button">Delivery</button>
+        <button class="filter-button">Takeout</button>
+      </div>
+    {% endif %}
+    
+    {% if selected_restaurant %}
+      <div class="restaurant-details">
+        <div class="restaurant-header">
+          <div class="restaurant-header-info">
+            <h2>{{ selected_restaurant.name }}</h2>
+            <div class="restaurant-rating">
+              <span class="star-rating">
+                {% for i in range(5) %}
+                  {% if i < selected_restaurant.rating|int %}
+                    ★
+                  {% elif i < selected_restaurant.rating %}
+                    ☆
+                  {% else %}
+                    ☆
+                  {% endif %}
+                {% endfor %}
+              </span>
+              {{ selected_restaurant.rating }} stars
+            </div>
+            <div>
+              <span class="restaurant-price">{{ selected_restaurant.price }}</span>
+              {% if selected_restaurant.category %}
+                <span> • </span>
+                {% for cat in selected_restaurant.category.split(',') %}
+                  <span class="category-tag">{{ cat.strip() }}</span>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="restaurant-main">
+          <div>
+            <img src="{{ selected_restaurant.image_url }}" alt="{{ selected_restaurant.name }}" class="restaurant-image">
+            
+            <div class="restaurant-section">
+              <h3>Location & Contact</h3>
+              <p>{{ selected_restaurant.address }}</p>
+              <p>{{ selected_restaurant.phone }}</p>
+              <p>Open until 9:00 PM</p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="restaurant-section">
+              <h3>Reviews</h3>
+              {% for review in selected_restaurant.reviews %}
+                <div class="review-item">{{ review }}</div>
+              {% endfor %}
+              
+              <form method="get" style="margin-top: 20px;">
+                <h4>Write a Review</h4>
+                <input type="hidden" name="restaurant" value="{{ selected_restaurant.name }}">
+                <input type="text" name="feedback" placeholder="Write a review or comment" style="width: 100%; margin-bottom: 10px;">
+                <button type="submit">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="restaurant-grid">
+        {% for restaurant in restaurants %}
+          <div class="restaurant-card" onclick="window.location.href='?restaurant={{ restaurant.name }}'">
+            <img src="{{ restaurant.image_url }}" alt="{{ restaurant.name }}" class="restaurant-image">
+            <div class="restaurant-info">
+              <h3 class="restaurant-name">{{ restaurant.name }}</h3>
+              <div class="restaurant-rating">
+                <span class="star-rating">
+                  {% for i in range(5) %}
+                    {% if i < restaurant.rating|int %}
+                      ★
+                    {% elif i < restaurant.rating %}
+                      ☆
+                    {% else %}
+                      ☆
+                    {% endif %}
+                  {% endfor %}
+                </span>
+                {{ restaurant.rating }} stars
+              </div>
+              <div>
+                <span class="restaurant-price">{{ restaurant.price }}</span>
+                {% if restaurant.category %}
+                  <span> • </span>
+                  {% for cat in restaurant.category.split(',')[:1] %}
+                    <span>{{ cat.strip() }}</span>
+                  {% endfor %}
+                {% endif %}
+              </div>
+              <div class="restaurant-address">{{ restaurant.address }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <div class="disclaimer">
+      <p>Note: This application attempts to display restaurant data from Yelp. If scraping is blocked, mock data will be shown instead.</p>
+      <p>For production use, consider using the <a href="https://www.yelp.com/developers/documentation/v3" target="_blank">Yelp Fusion API</a>.</p>
+    </div>
+  </div>
+  
+  <script>
+    // Simple filter button functionality (for demonstration)
+    document.querySelectorAll('.filter-button').forEach(button => {
+      button.addEventListener('click', function() {
+        document.querySelectorAll('.filter-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        this.classList.add('active');
+        // In a real app, this would filter the restaurants
+      });
+    });
+  </script>
 </body>
 </html>
