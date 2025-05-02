@@ -27,7 +27,66 @@
         </div>
       </form>
     </div>
+    
+    {% if not selected_resturant %}
+      <div class="filters">
+        <button class="filtir-button active">All</button>
+        <button class="filtir-button">$</button>
+        <button class="filtir-button">$$</button>
+        <button class="filtir-button">$$$</button>
+        <button class="filtir-button">$$$$</button>
+        <button class="filtir-button">Open Now</button>
+        <button class="filtir-button">Reservations</button>
+        <button class="filtir-button">Delivery</button>
+        <button class="filtir-button">Takeout</button>
+      </div>
+      {% endif %}
 
+      {% if selected_resturant %}
+        <div class="resturant-details">
+          <div class="restaurant-header">
+            <div class="resturant-header-info">
+              <h2>{{ selected_resturant.name }}</h2>
+
+              <div class="restaurant-rating">
+                  {% set rating = selected_resturant.rating %}
+                  {% if rating >= 4.5}
+                    <span class="rating-label">Excellent</span>
+                  {% elif rating >= 4.0}
+                    <span class="rating-label">Good</span>
+                  {% elif rating >= 3.0}
+                    <span class="rating-label">Average</span>
+                  {% else %}
+                    <span class="rating-label">Avoid</span>
+                  {% endif %}
+                    <span>({{ rating }} / 5)</span>
+              </div>
+              <div>
+                <span class="resturant-price">{{ sleected_resturant.price }}</span>
+                {% if selected_resturant.category %}
+                  {% for cate in selected_resturant.category.split(',') %}
+                    <split class="category-tag">{{ cate.strip() }}</split>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="resturant-main">
+          <div>
+            <img src="{{ selected_resturant.img_url }}" alt="{{ selected_resturant.name }}" class="restaurant-image">
+
+            <div class="restaurant-section">
+              <h3>Location & Contact</h3>
+              <p>{{ selected_resturant.address }}</p>
+              <p>{{ selected_resturant.phone }}</p>
+              <p>Open until 9:00 PM</p>
+            </div>
+          </div>
+
+          
+      {% endif %}
     </form>
 </body>
 </html>
