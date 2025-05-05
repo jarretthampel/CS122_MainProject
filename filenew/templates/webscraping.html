@@ -237,6 +237,24 @@
     <div class="search-form">
       <form method="get">
         <div>
+          <label for="location">Choose a city:</label>
+          <select name="location" id="location" onchange="this.form.submit()">
+            {% for city in cities %}
+              <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>{{ city.split(',')[0] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="price_range">Price range:</label>
+          <select name="price_range" id="price_range" onchange="this.form.submit()">
+            <option value="" {% if not price_range %}selected{% endif %}>Any</option>
+            <option value="$" {% if price_range == '$' %}selected{% endif %}>$</option>
+            <option value="$$" {% if price_range == '$$' %}selected{% endif %}>$$</option>
+            <option value="$$$" {% if price_range == '$$$' %}selected{% endif %}>$$$</option>
+            <option value="$$$$" {% if price_range == '$$$$' %}selected{% endif %}>$$$$</option>
+          </select>
+        </div>
+        <div>
           <label for="resturant">Select a Resturant:</label>
           <select name="resturant" id="resturant" onchange="this.form.submit()">
             <option value="">-- Select a Restaurant --</option>
