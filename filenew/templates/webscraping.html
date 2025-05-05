@@ -245,6 +245,10 @@
           </select>
         </div>
         <div>
+          <label for="type_of_food">Type of food:</label>
+          <input type="text" name="type_of_food" id="type_of_food" value="{{ type_of_food or '' }}" onchange="this.form.submit()">
+        </div>
+        <div>
           <label for="price_range">Price range:</label>
           <select name="price_range" id="price_range" onchange="this.form.submit()">
             <option value="" {% if not price_range %}selected{% endif %}>Any</option>
