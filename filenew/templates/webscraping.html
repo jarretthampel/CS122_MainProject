@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bay Area Restaurants</title>
+  <title>San Jose Restaurants</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -59,94 +59,94 @@
       background-color: be1e1e;
     }
 
-    .resturant-grid {
+    .restaurant-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
       gap: 20px;
     }
 
-    .resturant-card {
+    .restaurant-card {
       background-color: white;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px, 4px rgba(0,0,0,0,1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0,1);
       transition: transform 0.2s;
       cursor: pointer;
     }
 
-    .resturant-card:hover {
+    .restaurant-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 5px, rgba(0,0,0,0,1);
+      box-shadow: 0 5px rgba(0,0,0,0,1);
     }
 
-    .resturant-image {
+    .restaurant-image {
       width: 100%;
       height: 200px;
       object-fit: cover;
     }
 
-    .resturant-info {
+    .restaurant-info {
       padding: 15px;
     }
 
-    .resturant-name {
+    .restaurant-name {
       font-weight: bold;
       font-size: 18px;
       margin: 0 0 10px 0;
     }
 
-    .resturant-rating {
+    .restaurant-rating {
       color: #f15c4f;
       margin-bottom: 5px;
     }
 
-    .resturant-category, .resturant-price{
+    .restaurant-category, .restaurant-price{
       color: #666;
       font-size: 14px;
     }
 
-    .resturant-address {
+    .restaurant-address {
       font-size: 14px;
       margin-top: 10px;
     }
 
-    .resturant-details {
+    .restaurant-details {
       background-color: white;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0,1);
     }
 
-    .resturant-header {
+    .restaurant-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
 
-    .resturant-header-info {
+    .restaurant-header-info {
       display: flex;
       flex-direction: column;
       gap: 5px;
     }
 
-    .resturant-main {
+    .restaurant-main {
       display: grid;
       grid-template-columns: 1fr;
       gap: 20px;
     }
 
     @media (min-width: 768px) {
-      .resturant-main {
+      .restaurant-main {
         grid-template-columns: 1fr 1fr;
       }
     }
 
-    .resturant-section {
+    .restaurant-section {
       margin-bottom: 20px;
     }
 
-    .resturant-section h3 {
+    .restaurant-section h3 {
       border-bottom: 1px solid #eee;
       padding-bottom: 10px;
       margin-bottom: 15px;
@@ -220,7 +220,7 @@
     }
 
     @media (max-width: 768px) {
-      .resturant-grid {
+      .restaurant-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -230,15 +230,15 @@
 <body>
   <div class="container">
     <div class="yelp-header">
-      <h1>San Jose Resturants</h1>
-    <div class="yelp-logo">Yelp</div>
+      <h1>San Jose Restaurants</h1>
+      <div class="yelp-logo">Yelp</div>
     </div>
 
     <div class="search-form">
       <form method="get">
         <div>
-          <label for="location">Choose a city:</label>
-          <select name="location" id="location" onchange="this.form.submit()">
+          <label for="city">Choose a city:</label>
+          <select name="city" id="city" onchange="this.form.submit()">
             {% for city in cities %}
               <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>{{ city.split(',')[0] }}</option>
             {% endfor %}
@@ -249,87 +249,77 @@
           <input type="text" name="type_of_food" id="type_of_food" value="{{ type_of_food or '' }}" onchange="this.form.submit()">
         </div>
         <div>
-          <label for="price_range">Price range:</label>
-          <select name="price_range" id="price_range" onchange="this.form.submit()">
-            <option value="" {% if not price_range %}selected{% endif %}>Any</option>
-            <option value="$" {% if price_range == '$' %}selected{% endif %}>$</option>
-            <option value="$$" {% if price_range == '$$' %}selected{% endif %}>$$</option>
-            <option value="$$$" {% if price_range == '$$$' %}selected{% endif %}>$$$</option>
-            <option value="$$$$" {% if price_range == '$$$$' %}selected{% endif %}>$$$$</option>
-          </select>
-        </div>
-        <div>
-          <label for="resturant">Select a Resturant:</label>
-          <select name="resturant" id="resturant" onchange="this.form.submit()">
+          <label for="restaurant">Select a Restaurant:</label>
+          <select name="restaurant" id="restaurant" onchange="this.form.submit()">
             <option value="">-- Select a Restaurant --</option>
             {% for restaurant in restaurants %}
-            <option value="{{ resturant.name }}" {% if selected_resturant and selected_resturant.name == resturant.name %}selected{% endif %}>
-              {{ restaurant.name }}
-            </option>
+              <option value="{{ restaurant.name }}" {% if selected_restaurant and selected_restaurant.name == restaurant.name %}selected{% endif %}>{{ restaurant.name }}</option>
             {% endfor %}
           </select>
         </div>
       </form>
     </div>
     
-    {% if not selected_resturant %}
+    {% if not selected_restaurant %}
       <div class="filters">
-        <button class="filtir-button active">All</button>
-        <button class="filtir-button">$</button>
-        <button class="filtir-button">$$</button>
-        <button class="filtir-button">$$$</button>
-        <button class="filtir-button">$$$$</button>
-        <button class="filtir-button">Open Now</button>
-        <button class="filtir-button">Reservations</button>
-        <button class="filtir-button">Delivery</button>
-        <button class="filtir-button">Takeout</button>
+        <button class="filter-button active">All</button>
+        <button class="filter-button">$</button>
+        <button class="filter-button">$$</button>
+        <button class="filter-button">$$$</button>
+        <button class="filter-button">$$$$</button>
+        <button class="filter-button">Open Now</button>
+        <button class="filter-button">Reservations</button>
+        <button class="filter-button">Delivery</button>
+        <button class="filter-button">Takeout</button>
       </div>
-      {% endif %}
+    {% endif %}
 
-      {% if selected_resturant %}
-        <div class="resturant-details">
+      {% if selected_restaurant %}
+        <div class="restaurant-details">
           <div class="restaurant-header">
-            <div class="resturant-header-info">
-              <h2>{{ selected_resturant.name }}</h2>
+            <div class="restaurant-header-info">
+              <h2>{{ restaurant.name }}</h2>
 
               <div class="restaurant-rating">
-                  {% set rating = selected_resturant.rating %}
-                  {% if rating >= 4.5}
+                  {% set rating = restaurant.rating %}
+                  {% if rating >= 4.5 %}
                     <span class="rating-label">Excellent</span>
-                  {% elif rating >= 4.0}
+                  {% elif rating >= 4.0 %}
                     <span class="rating-label">Good</span>
-                  {% elif rating >= 3.0}
+                  {% elif rating >= 3.0 %}
                     <span class="rating-label">Average</span>
                   {% else %}
                     <span class="rating-label">Avoid</span>
                   {% endif %}
                     <span>({{ rating }} / 5)</span>
               </div>
+
               <div>
-                <span class="resturant-price">{{ sleected_resturant.price }}</span>
-                {% if selected_resturant.category %}
-                  {% for cate in selected_resturant.category.split(',') %}
-                    <split class="category-tag">{{ cate.strip() }}</split>
+                <span class="restaurant-price">{{ selected_restaurant.price }}</span>
+                {% if selected_restaurant.category %}
+                  {% for cate in selected_restaurant.category.split(',') %}
+                    <span class="category-tag">{{ cate.strip() }}</span>
                   {% endfor %}
                 {% endif %}
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="resturant-main">
-          <div>a
-            <img src="{{ selected_resturant.img_url }}" alt="{{ selected_resturant.name }}" class="restaurant-image">
+          <div class="restaurant-main">
+            <div>
+              <img src="{{ selected_restaurant.image_url }}" alt="{{ selected_restaurant.name }}" class="restaurant-image">
 
-            <div class="restaurant-section">
-              <h3>Location & Contact</h3>
-              <p>{{ selected_resturant.address }}</p>
-              <p>{{ selected_resturant.phone }}</p>
-              <p>Open until 9:00 PM</p>
+              <div class="restaurant-section">
+                <h3>Location & Contact</h3>
+                <p>{{ selected_restaurant.address }}</p>
+                <p>{{ selected_restaurant.phone }}</p>
+                <p>Open until 9:00 PM</p>
+              </div>
             </div>
           </div>
-          
+        </div> 
       {% endif %}
     </form>
+  </div>
 </body>
 </html>
