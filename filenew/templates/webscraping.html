@@ -3,6 +3,9 @@
 <head>
   <title>Bay Area Restaurants</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Helvetica, sans-serif;
@@ -224,6 +227,8 @@
         grid-template-columns: 1fr;
       }
     }
+
+    
   </style>
 </head>
 
@@ -316,9 +321,24 @@
                 <p>Open until 9:00 PM</p>
               </div>
             </div>
+
+            <div>
+              <div class="restaurant-section">
+                <h3>Reviews</h3>
+                {% for review in selected_restaurant.reviews %}
+                  <div class="review-item">{{ review }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="restaurant-section">
+                <h3>Map</h3>
+                <div style="height: 200px; border-radius: 8px; overflow: hidden;" id="singleRestaurantMap"></div>
+              </div>
+            </div>
           </div>
         </div> 
       {% endif %}
+    
     </form>
   </div>
 </body>
