@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 import os 
 import shutil
 import time 
+from datetime import datetime
+import math
 
 app = Flask(__name__)
 
@@ -28,6 +30,83 @@ CITIES = [
     "San Ramon, CA",
     "Dublin, CA"
 ]
+def scrape_yelp_restaurants(location="San Jose, CA",search_term="", limit=30):
+    restaurants = []
+    try:
+        url = f'https://www.yelp.com/search?find_desc={search_term.replace(" ", "+")}+Restaurants&find_loc={location.replace(" ", "+")}'
+
+        time.sleep(random.uniform(1,3))
+
+        response = request.get(url,header=headers, timeout=20)
+
+        if 'You have been blocked' in response.text:
+            print('Yelp has blocked the request. Using mock data.')
+            return get_mock_restaurant_data(location,limit)
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        restaurant_elements = soup.select('div[data-testid="serp-ia-card"]')
+
+        if not restaurant_elements:
+            restaurant_elements = soup.select('li.border-color--default__09f24__NPAKY')
+
+        if not restaurant_elements:
+            restaurant_elements = soup.select('div.container__09f24__mpR8_')
+
+        if restaurant_elements:
+            for element in restaurant_elements[:limit]:
+                try:
+                    name_element = element.slect_one('a[data-testid="header-link"]') or element.select_one('h3') or element.select_one('a.css-19v1rkv')
+                    if not name_element:
+                        continue
+                    name = name_elementget_text().strip()
+
+                    rating_element = element.select_one('div[aria-label*="star rating"]') or element.select_one('span.css-1e4fdj9')
+                    rating = 4.0
+                    if rating_element:
+                        aria_label = rating_element.get('aria-label', '')
+                        if 'star rating' in aria_label.lower():
+                            for part in aria_label.split():
+                                try:
+                                    rating = float(part.replace(',','.'))
+                                    break
+                                except ValueError:
+                                    continue
+                    review_count_element = element.select_one('span.css-chan6m') or element.select_one('span[aria-label*="review"]')
+                    review_count = random.radiant(10,500)
+                    if review_count_element:
+                        text = review_count_element.get_text().strip()
+                        try:
+                            review_count = int(''.join(filter(str.isdigit.text)))
+                        except ValueError:
+                            pass
+                    price = random.choice(['$','$$','$$$','$$$$'])
+                    category = 'Restaurant'
+                    price_category_element = element.select_one('p.css-16lklrv') or element.select_one('p')
+                    if price_category_element:
+                        text = price_category_element.get_text().strip()
+                        if '$' in text:
+                            price_part = ''
+                            for char in text:
+                                if char == '$':
+                                    price_part += '$'
+                                elif price_part:
+                                    break
+                            if price_part:
+                                price = price_part
+
+                        if '.' in text:
+                            parts = text.split('.')
+                            if len(parts) > 1:
+                                category = parts[i].strip()
+                    address = f'{random.radint(100,999)} Main St, {location}'
+                    address_element = element.select_one('address') or element.selected_one('span.css-4g6ai3')
+                    if address_element:
+                        address = address_element.get_text().strip() or address
+                        
+                                                                                                                
+
+
 
 # Mock function for demonstration; replace with your actual scraping logic
 # Each restaurant is a dict with all keys expected by the template
