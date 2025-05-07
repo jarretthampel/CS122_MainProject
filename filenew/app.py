@@ -80,6 +80,7 @@ def scrape_yelp_restaurants(location="San Jose, CA",search_term="", limit=30):
                             review_count = int(''.join(filter(str.isdigit.text)))
                         except ValueError:
                             pass
+                    # extract price and category
                     price = random.choice(['$','$$','$$$','$$$$'])
                     category = 'Restaurant'
                     price_category_element = element.select_one('p.css-16lklrv') or element.select_one('p')
@@ -98,7 +99,7 @@ def scrape_yelp_restaurants(location="San Jose, CA",search_term="", limit=30):
                         if '.' in text:
                             parts = text.split('.')
                             if len(parts) > 1:
-                                category = parts[i].strip()
+                                category = parts[1].strip()
                     address = f'{random.radint(100,999)} Main St, {location}'
                     address_element = element.select_one('address') or element.selected_one('span.css-4g6ai3')
                     if address_element:
@@ -156,6 +157,85 @@ def scrape_yelp_restaurants(location="San Jose, CA",search_term="", limit=30):
     except Exception as e:
         print(f"Error scraping Yelp: {e}")
         return get_mock_restaurant_data(location, limit)
+    
+    restaurants.sort(key=lambda x: x['popularity'], reverse=True)
+    return restaurants
+
+def get_mock_restaurant_data(location="San Jose, CA"):
+    # center coordinates for different cities
+    city_coord = {
+        'San Jose, CA': (37.335480,-121.893028),
+        'San Francisco, CA': (37.784279,-122.407234),
+        'Oakland, CA': (37.804363,-122.271111),
+        'Berkley, CA': (37.871666,-122.272781),
+        'Palo Alto, CA': (37.468319,-122.143936),
+        "Mountain View, CA": (37.386051,-122.083855),
+        "Fremont, CA": (37.548271,-121.988571),
+        "Sunnyvale, CA": (37.368832,-122.036346),
+        "Santa Clara, CA": (37.354107,-121.955238),
+        "Redwood City, CA": (37.487846,-122.236115),
+        "Richmond, CA": (37.935757,-122.347748),
+        "Pleasanton, CA": (37.658435,-121.876997),
+        "San Ramon, CA": (37.7747,-121.9735),
+        "Dublin, CA": (37.702152,-121.935791)
+    }
+
+    # get base coords for the selected location
+
+    base_lat, base_lon = city_coord.get(location, (37.335480, -121.893028))
+
+    restaruant_names = ['Athena Grill Catering',
+                        'Casa Juana',
+                        'Fleming\'s Prime Steakhouse & Wine Bar',
+                        'Élyse Restaurant',
+                        'Blue Monkey Cafe & Restaurant',
+                        'Joey Valley Fair',
+                        'Water Tower Kitchen',
+                        'The Grand View Restaurant',
+                        'Goodtime Bar',
+                        'Must be Thai',
+                        'Eos & Nyx',
+                        'Jackie\'s Place',
+                        'Fox Tale Fermentation Project',
+                        'Benihana'
+    ]
+    categories = [
+        'Falafel, Caterers, Greek',
+        'Colobian',
+        'Wine Bars, Steakhouses,Seafood',
+        'French, Vietnamese, Cocktail Bars',
+        'Vietnamese',
+        'Sushi Bars, Steakhouses, Wine Bars',
+        'New American, Sports Bars, Cocktail Bar',
+        'Venues & Event Spaces, Steakhouses, New American',
+        'Wine Bars, Tapas/Small Plates, Seafood',
+        'Thai, Seafood, Noodles',
+        'Cocktail Bars, Breakfast & Brunch, New American',
+        'Soul Food, Barbeque',
+        'Specialty Food, Vegetarian Brewpubs'
+        'Japanese, Sushi Bars, Teppanyaki'
+    ]
+
+    prices = ['$', '$$', '$$$', '$$$$']
+
+    images = [
+        'https://s3-media0.fl.yelpcdn.com/bphoto/Ls0vBoGGa_vL3QlYq1x8xQ/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/Sz_8YKQLGzMfmLeeoq43zA/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/offerphoto/wrvbIfmyDAxF6M-AAOgHSQ/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/-ryDQxwnP0xogwMN1C89Hg/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/NSm93YsKOb2C53Qt6IJiMw/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/aJ8iQ1YtqUCiwsdndb5hyA/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/mNKjS4IIPBX-WT2fsxfQFA/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/gsy_3gmpd7f_Y-Rey8RAbw/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/lEEjBtL6qaBCYS_BC2CrnA/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/3cW19YDRs1O-sF2Unu8anw/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/cI-3vLaqaGZ3GAA8HjIHEQ/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/HAGJsU8qOir5qvMjr8vO3Q/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/qM81A51AeEgkHEAeJm8SJg/348s.jpg',
+        'https://s3-media0.fl.yelpcdn.com/bphoto/oHFtt-32ptbcqJpbK_uzyw/348s.jpg',
+    ]
+
+    
     
 
 
@@ -318,10 +398,7 @@ def home():
         print(f'Error scraping Yelp: {e}')
         resturants = get_resturant_data()
 
-        
-                                
-
-                                    
+             
                                     
         # this is going to look for the 10 resturants
         if not resturant_elements:
