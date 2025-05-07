@@ -30,16 +30,42 @@ CITIES = [
 ]
 
 # Mock function for demonstration; replace with your actual scraping logic
-# Each restaurant is a dict with at least 'name' and 'type_of_food' keys
+# Each restaurant is a dict with all keys expected by the template
 MOCK_RESTAURANTS = {
     city: [
-        {"name": f"{city.split(',')[0]} Restaurant {i+1}", "type_of_food": "Italian" if i % 2 == 0 else "Chinese"}
+        {
+            "name": f"{city.split(',')[0]} Restaurant {i+1}",
+            "type_of_food": "Italian" if i % 2 == 0 else "Chinese",
+            "rating": round(4.0 + (i % 5) * 0.2, 1),
+            "price": ["$", "$$", "$$$", "$$$$"][i % 4],
+            "category": "Italian, Pizza" if i % 2 == 0 else "Chinese, Noodles",
+            "image_url": "https://via.placeholder.com/400x200.png?text=Restaurant+Image",
+            "address": f"{100+i} Main St, {city.split(',')[0]}",
+            "phone": f"(555) 123-45{str(i).zfill(2)}"
+        }
         for i in range(10)
     ] for city in CITIES
 }
 
 def get_restaurants(city):
     return MOCK_RESTAURANTS.get(city, [])
+
+# Example template for real scraping (replace with your actual logic):
+# def scrape_restaurant_data(city, type_of_food=None):
+#     ...
+#     for each_restaurant in scraped_results:
+#         restaurant = {
+#             "name": ...,
+#             "type_of_food": ...,
+#             "rating": ...,
+#             "price": ...,
+#             "category": ...,
+#             "image_url": ...,
+#             "address": ...,
+#             "phone": ...
+#         }
+#         ...
+#     return restaurant_list
 
 @app.route("/", methods=["GET"])
 def index():

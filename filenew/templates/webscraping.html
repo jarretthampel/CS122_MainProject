@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Helvetica, sans-serif;
       line-height: 1.6;
       margin: 0;
       padding: 20px;
@@ -230,7 +230,7 @@
 <body>
   <div class="container">
     <div class="yelp-header">
-      <h1>San Jose Restaurants</h1>
+      <h1>Bay Area Restaurants</h1>
       <div class="yelp-logo">Yelp</div>
     </div>
 
@@ -278,10 +278,10 @@
         <div class="restaurant-details">
           <div class="restaurant-header">
             <div class="restaurant-header-info">
-              <h2>{{ restaurant.name }}</h2>
+              <h2>{{ selected_restaurant.name }}</h2>
 
               <div class="restaurant-rating">
-                  {% set rating = restaurant.rating %}
+                  {% set rating = selected_restaurant.rating %}
                   {% if rating >= 4.5 %}
                     <span class="rating-label">Excellent</span>
                   {% elif rating >= 4.0 %}
