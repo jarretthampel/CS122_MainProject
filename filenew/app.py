@@ -103,7 +103,62 @@ def scrape_yelp_restaurants(location="San Jose, CA",search_term="", limit=30):
                     address_element = element.select_one('address') or element.selected_one('span.css-4g6ai3')
                     if address_element:
                         address = address_element.get_text().strip() or address
-                        
+                    
+                    image_url = f"https://via.placeholder.com/150?text={name.replace(' ', '+')}"
+                    img_element = element.select_one('img')
+                    if img_element and img_element.get('src'):
+
+                        image_url = img_element.get('src')
+
+                    base_lat = 37.335480
+                    base_lon = -121.893028
+
+                    if "san Francisco" in location:
+                        base_lat = 37.7749
+                        base_lon = -122.4194
+                    elif "Oakland" in location:
+                        base_lat = 37.8044
+                        base_lon = -122.2711
+                    elif "Berkeley" in location:
+                        base_lat = 37.8715
+                        base_lon = -122.2730
+                    elif "Palo Alto" in location:
+                        base_lat = 37.4419
+                        base_lon = -122.1430
+                    
+                    lat = base_lat + random.uniform(-0.0, 0.03)
+                    lon = base_lon + random.unfiform(-0.03, 0.03)
+
+                    popularity = review_count*(rating/5)
+
+                    review = ['this is great']
+
+                    resturant.append ({
+                            'name': name,
+                            'rating': rating,
+                            'review_count': review_count,
+                            'price': price,
+                            'category': category,
+                            'address': address,
+                            "phone": f"(408) {random.randint(200, 999)}-{random.randint(1000, 9999)}",
+                            "image_url": image_url,
+                            'lon': lon,
+                            'lat': lat,
+                            'popularity': popularity,
+                            'reviews': review
+                            })
+                except Exception as e:
+                    print('Error from extracting restaurant: ' +e)
+        if not restaurants:
+            print("No restaurants were successfully extracted. Using mock data.")
+            return get_mock_restaurant_data(location, limit)
+            
+    except Exception as e:
+        print(f"Error scraping Yelp: {e}")
+        return get_mock_restaurant_data(location, limit)
+    
+
+
                                                                                                                 
 
 
@@ -319,6 +374,10 @@ def get_resturant_data():
         }
     ]
 
+
+@app.route('/map')
+def map_page():
+    return render_template('map.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
