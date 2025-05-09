@@ -9,6 +9,7 @@ import shutil
 import time 
 from datetime import datetime
 import math
+import random
 
 app = Flask(__name__)
 
@@ -30,135 +31,110 @@ CITIES = [
     "San Ramon, CA",
     "Dublin, CA"
 ]
-def scrape_yelp_restaurants(location="San Jose, CA",search_term="", limit=30):
-    restaurants = []
-    try:
-        url = f'https://www.yelp.com/search?find_desc={search_term.replace(" ", "+")}+Restaurants&find_loc={location.replace(" ", "+")}'
 
-        time.sleep(random.uniform(1,3))
-
-        response = request.get(url,header=headers, timeout=20)
-
-        if 'You have been blocked' in response.text:
-            print('Yelp has blocked the request. Using mock data.')
-            return get_mock_restaurant_data(location,limit)
-
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        restaurant_elements = soup.select('div[data-testid="serp-ia-card"]')
-
-        if not restaurant_elements:
-            restaurant_elements = soup.select('li.border-color--default__09f24__NPAKY')
-
-        if not restaurant_elements:
-            restaurant_elements = soup.select('div.container__09f24__mpR8_')
-
-        if restaurant_elements:
-            for element in restaurant_elements[:limit]:
-                try:
-                    name_element = element.slect_one('a[data-testid="header-link"]') or element.select_one('h3') or element.select_one('a.css-19v1rkv')
-                    if not name_element:
-                        continue
-                    name = name_elementget_text().strip()
-
-                    rating_element = element.select_one('div[aria-label*="star rating"]') or element.select_one('span.css-1e4fdj9')
-                    rating = 4.0
-                    if rating_element:
-                        aria_label = rating_element.get('aria-label', '')
-                        if 'star rating' in aria_label.lower():
-                            for part in aria_label.split():
-                                try:
-                                    rating = float(part.replace(',','.'))
-                                    break
-                                except ValueError:
-                                    continue
-                    review_count_element = element.select_one('span.css-chan6m') or element.select_one('span[aria-label*="review"]')
-                    review_count = random.radiant(10,500)
-                    if review_count_element:
-                        text = review_count_element.get_text().strip()
-                        try:
-                            review_count = int(''.join(filter(str.isdigit.text)))
-                        except ValueError:
-                            pass
-                    price = random.choice(['$','$$','$$$','$$$$'])
-                    category = 'Restaurant'
-                    price_category_element = element.select_one('p.css-16lklrv') or element.select_one('p')
-                    if price_category_element:
-                        text = price_category_element.get_text().strip()
-                        if '$' in text:
-                            price_part = ''
-                            for char in text:
-                                if char == '$':
-                                    price_part += '$'
-                                elif price_part:
-                                    break
-                            if price_part:
-                                price = price_part
-
-                        if '.' in text:
-                            parts = text.split('.')
-                            if len(parts) > 1:
-                                category = parts[i].strip()
-                    address = f'{random.radint(100,999)} Main St, {location}'
-                    address_element = element.select_one('address') or element.selected_one('span.css-4g6ai3')
-                    if address_element:
-                        address = address_element.get_text().strip() or address
-                        
-                                                                                                                
-
-
-
-# Mock function for demonstration; replace with your actual scraping logic
-# Each restaurant is a dict with all keys expected by the template
-MOCK_RESTAURANTS = {
-    city: [
+def get_restaurant_data():
+    # Fallback/mock data
+    return [
         {
-            "name": f"{city.split(',')[0]} Restaurant {i+1}",
-            "type_of_food": "Italian" if i % 2 == 0 else "Chinese",
-            "rating": round(4.0 + (i % 5) * 0.2, 1),
-            "price": ["$", "$$", "$$$", "$$$$"][i % 4],
-            "category": "Italian, Pizza" if i % 2 == 0 else "Chinese, Noodles",
-            "image_url": "https://via.placeholder.com/400x200.png?text=Restaurant+Image",
-            "address": f"{100+i} Main St, {city.split(',')[0]}",
-            "phone": f"(555) 123-45{str(i).zfill(2)}"
+            'name': 'Casa Juana',
+            'rating': 2.8,
+            'price': '$$',
+            'category': 'Colombian',
+            'address': '581 W Alma Ave San Jose, CA 95125',
+            'phone': 'None',
+            'image_url': 'https://s3-media0.fl.yelpcdn.com/bphoto/HYAEl-VoHjFLb6aXs-9HbA/348s.jpg',
+            'type_of_food': 'Colombian',
         }
-        for i in range(10)
-    ] for city in CITIES
-}
+    ]
 
-def get_restaurants(city):
-    return MOCK_RESTAURANTS.get(city, [])
-
-# Example template for real scraping (replace with your actual logic):
-# def scrape_restaurant_data(city, type_of_food=None):
-#     ...
-#     for each_restaurant in scraped_results:
-#         restaurant = {
-#             "name": ...,
-#             "type_of_food": ...,
-#             "rating": ...,
-#             "price": ...,
-#             "category": ...,
-#             "image_url": ...,
-#             "address": ...,
-#             "phone": ...
-#         }
-#         ...
-#     return restaurant_list
+def scrape_restaurant_data(city, type_of_food=None):
+    # Scrape Yelp for restaurants in the given city
+    url_city = city.replace(' ', '+').replace(',', '%2C')
+    url = f'https://www.yelp.com/search?find_desc=Restaurants&find_loc={url_city}'
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+        if 'You have been blocked' in response.text:
+            print('Blocked by Yelp, using fallback data.')
+            return get_restaurant_data()
+        soup = BeautifulSoup(response.content, "html.parser")
+        restaurants = []
+        rest_elements = soup.select('div[data-testid="serp-ia-card"]')
+        for element in rest_elements[:10]:
+            try:
+                name_element = element.select_one('a[data-testid="header-link"]') or element.select_one('h3')
+                if not name_element:
+                    continue
+                name = name_element.get_text().strip()
+                rating = 4.0
+                rating_element = element.select_one('div[aria-label*="star rating"]')
+                if rating_element:
+                    aria_label = rating_element.get('aria-label', '')
+                    if 'star rating' in aria_label.lower():
+                        parts = aria_label.split()
+                        for part in parts:
+                            try:
+                                rating = float(part.replace(',', '.'))
+                                break
+                            except ValueError:
+                                continue
+                price = '$'
+                category = 'Restaurant'
+                price_category_element = element.select_one('p')
+                if price_category_element:
+                    text = price_category_element.get_text().strip()
+                    if '$' in text:
+                        price_part = ""
+                        for char in text:
+                            if char == '$':
+                                price_part += '$'
+                            elif price_part:
+                                break
+                        if price_part:
+                            price = price_part
+                    if "." in text:
+                        parts = text.split(".")
+                        if len(parts) > 1:
+                            category = parts[1].strip()
+                address = city
+                address_element = element.select_one('address')
+                if address_element:
+                    address = address_element.get_text().strip()
+                image_url = f"https://via.placeholder.com/150?text={name.replace(' ', '+')}"
+                img_element = element.select_one('img')
+                if img_element and img_element.get('src'):
+                    image_url = img_element.get('src')
+                phone = f"(408) {random.randint(200, 999)}-{random.randint(1000, 9999)}"
+                restaurants.append({
+                    'name': name,
+                    'rating': rating,
+                    'price': price,
+                    'category': category,
+                    'address': address,
+                    'phone': phone,
+                    'image_url': image_url,
+                    'type_of_food': category,
+                })
+            except Exception as e:
+                print(f"Error extracting restaurant: {e}")
+        if not restaurants:
+            print('No restaurants extracted, using fallback data.')
+            return get_restaurant_data()
+        # Filter by type_of_food if provided
+        if type_of_food:
+            restaurants = [r for r in restaurants if type_of_food.lower() in r.get("type_of_food", "").lower()]
+        return restaurants
+    except Exception as e:
+        print(f'Error scraping Yelp: {e}')
+        return get_restaurant_data()
 
 @app.route("/", methods=["GET"])
 def index():
     selected_city = request.args.get("city", CITIES[0])
     type_of_food = request.args.get("type_of_food", "")
     selected_restaurant_name = request.args.get("restaurant", "")
-
-    # Get all restaurants for the selected city
-    restaurants = get_restaurants(selected_city)
-
-    # Filter by type_of_food if provided
-    if type_of_food:
-        restaurants = [r for r in restaurants if type_of_food.lower() in r.get("type_of_food", "").lower()]
-
+    # Scrape or fallback
+    restaurants = scrape_restaurant_data(selected_city, type_of_food)
     # Find the selected restaurant if any
     selected_restaurant = None
     if selected_restaurant_name:
@@ -166,7 +142,6 @@ def index():
             if r["name"] == selected_restaurant_name:
                 selected_restaurant = r
                 break
-
     return render_template(
         "webscraping.html",
         cities=CITIES,
