@@ -265,6 +265,10 @@ def get_mock_restaurant_data(location="San Jose, CA", limit=20):
         }
     ]
     
+    # Filter by location if specified
+    if location:
+        restaurant_data = [r for r in restaurant_data if r["location"] == location]
+
     restaurants = []
     
     for i, data in enumerate(restaurant_data[:limit]):
