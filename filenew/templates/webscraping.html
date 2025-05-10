@@ -73,6 +73,19 @@
       background-color: #be1e1e;
     }
 
+    a {
+      color: #d32323;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: red;
+    }
+
+    a:active {
+      color: #f9f9f9;
+    }
+
     .restaurant-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
@@ -384,7 +397,9 @@
   <div class="container">
     <div class="yelp-header">
       <h1>San Jose Restaurants</h1>
-      <div class="yelp-logo">Yelp</div>
+      <div class="yelp-logo">
+        <a href="https://www.yelp.com/" target="_blank">Yelp</a>
+      </div>
     </div>
 
     <div class="search-form">
@@ -551,6 +566,8 @@
                     <input type="radio" id="star1" name="rating" value="1">
                     <label for="star1" title="1 star"></label>
                   </div>
+
+                  <br>
                   
                   <textarea name="review_text" placeholder="Write a review or comment" rows="4" style="width: 100%; margin-bottom: 10px;" required></textarea>
                   <button type="submit">Submit Review</button>
