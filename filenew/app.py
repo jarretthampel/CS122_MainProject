@@ -15,22 +15,69 @@ app = Flask(__name__)
 
 os.makedirs('templates', exist_ok=True)
 
-CITIES = [
-    "San Francisco, CA",
-    "Oakland, CA",
-    "San Jose, CA",
-    "Berkeley, CA",
-    "Palo Alto, CA",
-    "Mountain View, CA",
-    "Fremont, CA",
-    "Sunnyvale, CA",
-    "Santa Clara, CA",
-    "Redwood City, CA",
-    "Richmond, CA",
-    "Pleasanton, CA",
-    "San Ramon, CA",
-    "Dublin, CA"
-]
+def get_mock_restaurant_locations():
+    restaurant_data = [
+        {
+            "name": "Athena Grill Catering",
+            "location": "Downtown"
+        },
+        {
+            "name": "Casa Juana",
+            "location": "Willow Glen"
+        },
+        {
+            "name": "Fleming's Prime Steakhouse & Wine Bar",
+            "location": "Santa Clara"
+        },
+        {
+            "name": "Élyse Restaurant",
+            "location": "Downtown"
+        },
+        {
+            "name": "Blue Monkey Cafe & Restaurant",
+            "location": "East San Jose"
+        },
+        {
+            "name": "JOEY Valley Fair",
+            "location": "West San Jose"
+        },
+        {
+            "name": "Water Tower Kitchen",
+            "location": "Campbell"
+        },
+        {
+            "name": "The Grandview Restaurant",
+            "location": "Los Gatos"
+        },
+        {
+            "name": "Goodtime Bar",
+            "location": "Downtown"
+        },
+        {
+            "name": "Must be Thai",
+            "location": "West San Jose"
+        },
+        {
+            "name": "Eos & Nyx",
+            "location": "Downtown"
+        },
+        {
+            "name": "Jackie's Place",
+            "location": "Downtown"
+        },
+        {
+            "name": "Fox Tale Fermentation Project",
+            "location": "Downtown"
+        },
+        {
+            "name": "Benihana",
+            "location": "Cupertino"
+        }
+    ]
+    locations = sorted(set(r["location"] for r in restaurant_data))
+    return locations
+
+CITIES = get_mock_restaurant_locations()
 
 # Function to scrape Yelp for restaurant data - now using mock data with real restaurant info
 def scrape_yelp_restaurants(location="San Jose, CA", search_term="", limit=30):
@@ -238,7 +285,7 @@ def get_mock_restaurant_data(location="San Jose, CA", limit=20):
             "name": data["name"],
             "rating": data["rating"],
             "review_count": data["review_count"],
-            "price": data["price"],
+            "price": data.get("price", ""),
             "category": data["category"],
             "address": f"{random.randint(100, 999)} {data['location']} St, {location}",
             "phone": f"({random.randint(200, 999)}) {random.randint(200, 999)}-{random.randint(1000, 9999)}",
@@ -266,6 +313,14 @@ def get_restaurant_categories(restaurants):
 
 def analyze_restaurant_data(restaurants):
     """Generate analytics from restaurant data"""
+    if not restaurants:
+        return {
+            'category_ratings': [],
+            'price_distribution': {},
+            'rating_distribution': {},
+            'top_by_reviews': [],
+            'top_by_rating': []
+        }
     # Convert to DataFrame for easier analysis
     df = pd.DataFrame(restaurants)
     
