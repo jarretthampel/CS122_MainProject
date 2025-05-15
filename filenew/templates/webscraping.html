@@ -631,264 +631,239 @@
   </div>
 
   <script>
-    // Global variables
-    let map;
+   let map;
     let singleMap;
+    let restaurant;
     let restaurants = {{ restaurants|tojson }};
-    let selectedRestaurant = {{ selected_restaurant|tojson if selected_restaurant else 'null' }};
-    
-    // Initialize the page
+    let selectedRestaurant = {{ selected_restaurant|tojson if selected_restaurant else 'null'}};
+
     document.addEventListener('DOMContentLoaded', function() {
-      initTabs();
+      intitTab();
       initFilters();
       initMap();
-      
+
       if (selectedRestaurant) {
         initSingleRestaurantMap();
       }
-      
+
       initCharts();
     });
-    
-    // Tab functionality
+
     function initTabs() {
-      const tabs = document.querySelectorAll('.tab');
+      const tabs = document.querySelectionAll('.tab');
       tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          // Remove active class from all tabs and content
+        tabs.addEventListener('click', () => {
           document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-          
-          // Add active class to clicked tab and corresponding content
+
           tab.classList.add('active');
           const tabId = tab.getAttribute('data-tab') + 'Tab';
-          document.getElementById(tabId).classList.add('active');
-          
-          // If map tab is activated, refresh the map
-          if (tab.getAttribute('data-tab') === 'map' && map) {
+          document.getElementById(tabId).classlist.add('active');
+
+          if (tab.getAttribute('data-tab') == 'map' && map) {
             map.invalidateSize();
-          }
+           }
+         });
         });
-      });
-    }
-    
-    // Filter functionality
-    function initFilters() {
-      const filterButtons = document.querySelectorAll('.filter-button');
-      filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          // Remove active class from all filter buttons
-          document.querySelectorAll('.filter-button').forEach(b => b.classList.remove('active'));
-          
-          // Add active class to clicked button
-          button.classList.add('active');
-          
-          // Get filter value
-          const filter = button.getAttribute('data-filter');
-          
-          // Apply filter to restaurant cards
-          const cards = document.querySelectorAll('.restaurant-card');
-          cards.forEach(card => {
-            const price = card.querySelector('.restaurant-price').textContent;
-            if (filter === 'all' || price === filter) {
-              card.style.display = 'block';
-            } else {
-              card.style.display = 'none';
-            }
+      }
+
+      function initFilters() {
+        const filterButtons = document.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            document.querySelectorAll('.filter-button').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+
+            const filter = button.getAttribute('data-filter');
+
+            const cards = document.querySelectorAll('.restaurant-card');
+            cards.forEach(card => {
+              const price = card.querySelector('.restaurant-price').textContent;
+              if (filter === 'all' || price === filter) {
+                card.style.display = 'block';
+                
+              }
+              else {
+                card.style.display = 'noen';
+              }
+            });
           });
         });
-      });
-    }
-    
-    // Initialize the map
-    function initMap() {
-      // Create map in the map tab
-      map = L.map('restaurantMap').setView([37.3382, -121.8863], 12);
-      
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map);
-      
-      // Add markers for each restaurant
-      restaurants.forEach(restaurant => {
-        if (restaurant.lat && restaurant.lng) {
-          const marker = L.marker([restaurant.lat, restaurant.lng]).addTo(map);
-          
-          // Create popup content
-          const popupContent = `
-            <div class="map-popup">
-              <img src="${restaurant.image_url}" alt="${restaurant.name}">
-              <h3>${restaurant.name}</h3>
-              <div class="map-popup-rating">${restaurant.rating} ★ (${restaurant.review_count} reviews)</div>
-              <div class="map-popup-info">${restaurant.price} • ${restaurant.category.split(',')[0]}</div>
-              <div class="map-popup-info">${restaurant.address}</div>
-              <a href="?city={{ selected_city }}&search={{ search_term }}&category={{ category_filter }}&price={{ price_filter }}&restaurant=${restaurant.name}" class="map-popup-link">View Details</a>
-            </div>
-          `;
-          
-          marker.bindPopup(popupContent);
-        }
-      });
-    }
-    
-    // Initialize the single restaurant map
-    function initSingleRestaurantMap() {
-      if (selectedRestaurant && selectedRestaurant.lat && selectedRestaurant.lng) {
-        singleMap = L.map('singleRestaurantMap').setView([selectedRestaurant.lat, selectedRestaurant.lng], 15);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(singleMap);
-        
-        const marker = L.marker([selectedRestaurant.lat, selectedRestaurant.lng]).addTo(singleMap);
-        marker.bindPopup(`<b>${selectedRestaurant.name}</b><br>${selectedRestaurant.address}`).openPopup();
       }
-    }
-    
-    // Initialize charts
-    function initCharts() {
-      // Prepare data for charts
-      const popularityData = restaurants.slice(0, 10).map(r => ({
-        name: r.name,
-        popularity: r.review_count * (r.rating / 5)
-      }));
-      
-      const reviewsData = restaurants.slice(0, 10).map(r => ({
-        name: r.name,
-        reviews: r.review_count
-      }));
-      
-      // Count restaurants by price
-      const priceData = {
-        '$': 0,
-        '$$': 0,
-        '$$$': 0,
-        '$$$$': 0
-      };
-      
-      restaurants.forEach(r => {
-        if (r.price in priceData) {
-          priceData[r.price]++;
-        }
-      });
-      
-      // Count restaurants by rating
-      const ratingData = {
-        '5': 0,
-        '4': 0,
-        '3': 0,
-        '2': 0,
-        '1': 0
-      };
-      
-      restaurants.forEach(r => {
-        const rating = Math.floor(r.rating);
-        if (rating >= 1 && rating <= 5) {
-          ratingData[rating.toString()]++;
-        }
-      });
-      
-      // Create popularity chart
-      new Chart(document.getElementById('popularityChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: popularityData.map(d => d.name),
-          datasets: [{
-            label: 'Popularity Score',
-            data: popularityData.map(d => d.popularity),
-            backgroundColor: '#d32323',
-            borderColor: '#be1e1e',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
+
+      function initMap() {
+        map = L.map('restaurantMap').setView([37.3382, -121.8863],12);
+        L.titleLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+
+        restaurants.forEach(restaurant => {
+          if (restaurant.lat && restaurant.lon) {
+            const marker = L.marker([restaurant.lat, restaurant.lon]).addTo(map);
+
+            const popupContent = `
+              <div class="map-popup"
+                <img src="${restaurant.image_url}" alt="${restaurant}">
+                <h3>${restaurant.name}</h3>
+                <div class="map-popup-rating">${restaurant.rating} ★ (${restaurant.review_count} reviews)</div>
+                <div class="map-popup-info">${restaurant.price} • ${restaurant.category.split(',')[0]}</div>
+                <div class="map-popup-info">${restaurant.address}</div>
+                <a href="?city={{ selected_city }}&search={{ search_term }}&category={{ category_filter }}&price={{ price_filter }}&restaurant=${restaurant.name}" class="map-popup-link">View Details</a>
+              </div>
+              `;
+
+            marker.bindPopup(popupContent);
           }
-        }
-      });
+        });
+      }
+
+      function initSingleRestaurantMap() {
+        if (selectedRestaurant && selectedRestaurant.lat && selectedRestaurant.lon) {
+          singleMap = L.map('sinleRestaurantMap').setView([selectedRestaurant.lat, selectedRestaurant.lon],15);
+
+          L.filterLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(singleMap);
+        const marker = L.marker([selectedRestaurant.lat, selectedRestaurant.lon]).addTo(singleMap);
+        marker.bindPopup(`<b>${selectedRestaurant.name}<b><br>${selectedRestaurant.address}`).openPopup();
       
-      // Create reviews chart
-      new Chart(document.getElementById('reviewsChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: reviewsData.map(d => d.name),
-          datasets: [{
-            label: 'Number of Reviews',
-            data: reviewsData.map(d => d.reviews),
-            backgroundColor: '#4285F4',
-            borderColor: '#3367D6',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
+        
+        }
+      }
+
+      function initCharts() {
+        const popularityData = restaurant.slice(0,10).map(r => ({
+          name: r.name,
+          popularity: r.review_count*(r.rating/5)
+        }));
+
+        const reviewData = restaurants.slice(1,10).map(r => ({
+          name: r.name,
+          reviews: r.review_count
+        }));
+
+        const priceData = {
+          '$': 0,
+          '$$': 0,
+          '$$$': 0,
+          '$$$$': 0
+        };
+
+        restaurants.forEach(r => {
+          if (r.price in priceData) {
+            priceData[r.price]++;
           }
-        }
-      });
-      
-      // Create price chart
-      new Chart(document.getElementById('priceChart').getContext('2d'), {
-        type: 'pie',
-        data: {
-          labels: Object.keys(priceData),
-          datasets: [{
-            data: Object.values(priceData),
-            backgroundColor: ['#34A853', '#FBBC05', '#EA4335', '#4285F4'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right'
-            }
+        });
+
+        const ratingData = {
+          '5': 0,
+          '4': 0,
+          '3': 0,
+          '2': 0,
+          '1': 0,
+        };
+
+        restaurants.forEach(r => {
+          const rating = Math.floor(r.rating);
+          if (rating >= 1 && rating <= 5){
+            ratingData[rating.toString()]++;
           }
-        }
-      });
-      
-      // Create rating chart
-      new Chart(document.getElementById('ratingChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: Object.keys(ratingData).map(r => r + ' Stars'),
-          datasets: [{
-            label: 'Number of Restaurants',
-            data: Object.values(ratingData),
-            backgroundColor: '#FBBC05',
-            borderColor: '#F9A825',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
+        });
+
+        new Chart(document.getElementById('popularityChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: popularityData.map(d => d.name),
+            datasets: [{
+              label: 'Popilarity Score',
+              data: popularityData.map(d => d.popularity),
+              backgroundColor: '#d32323',
+              borderColor: '#be1e1e',
+              borderWidth: 1
+            }]
           },
-          scales: {
-            y: {
-              beginAtZero: true
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRadio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
             }
           }
-        }
-      });
-    }
+        });
+        new Chart(document.getElementById('reviewsChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: reviewsData.map(d => d.name),
+            datasets: [{
+              label: 'Number of Reviews',
+              data: reviewsData.map(d => d.reviews),
+              backgroundColor: '#4285F4',
+              borderColor: '#3367D6',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRadio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+        });
+
+        new Chart(document.getElementById('priceChart').getContext('2d'), {
+          type: 'pie',
+          data: {
+            labels: Object.keys(priceData),
+            datasets: [{
+              data: Object.values(priceData),
+              backgroundColor: ['#34A853', '#FBBC05', '#EA4335', '#4285F4'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRadio: false,
+            plugins: {
+              legend: {
+                position: 'right'
+              }
+            }
+          }
+        });
+
+        new Chart(document.getElementById('ratingChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: Object.keys(ratingData).map(r => r + ' Stars'),
+            datasets: [{
+              label: 'Number of Restaurants',
+              data: Object.values(ratingData),
+              backgroundColor: '#FBBC05',
+              borderColor: #F9A825,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRadio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }
   </script>
 </body>
 </html>
